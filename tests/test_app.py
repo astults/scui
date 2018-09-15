@@ -1,5 +1,4 @@
 import unittest
-
 from app import App
 from tests.test_events import MockConsoleInput
 from tests.test_widgets import MockDisplay
@@ -50,6 +49,3 @@ class AppTest(unittest.TestCase):
         app.start()
         self.assertEqual(any_pos_x, display.min_x)
         self.assertTrue(any_pos_y, display.min_y)
-
-
-

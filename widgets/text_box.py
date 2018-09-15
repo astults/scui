@@ -1,8 +1,8 @@
 from widgets.widget_decorator import WidgetDecorator
 from .frame import Frame
-from .base_widget import Widget
 from .common import TextUtils
 from .common import Color
+
 
 class TextBox(WidgetDecorator):
     def __init__(self):
@@ -23,6 +23,7 @@ class TextBox(WidgetDecorator):
         self._newline = chr(13)
         self.width = default_width
         self.height = default_height
+        self.background_color_when_disabled = Color.GREEN
 
     def draw(self, display):
         if self._redraw_frame:
@@ -33,6 +34,10 @@ class TextBox(WidgetDecorator):
         i = self._cursor_index
         j = 0
         new_text = ""
+        bg_color = self.background_color
+        if not self.enabled:
+            bg_color = self.background_color_when_disabled
+
         while i < len(self.text):
             x, y = self._cursor_pos
             c = self.text[i]
@@ -44,7 +49,7 @@ class TextBox(WidgetDecorator):
                 c = empty_space
             elif TextUtils.is_newline(c):
                 self.newline_cursor_pos()
-                x,y = self._cursor_pos
+                x, y = self._cursor_pos
                 new_text += c
                 c = ""
                 j += 1
@@ -53,7 +58,7 @@ class TextBox(WidgetDecorator):
                 new_text += c
                 j += 1
 
-            display.draw_text(x, y, c, self.text_color, self.background_color)
+            display.draw_text(x, y, c, self.text_color, bg_color)
             i += 1
 
         self._cursor_index = i

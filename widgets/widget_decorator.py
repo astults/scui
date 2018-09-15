@@ -1,5 +1,6 @@
 from .base_widget import Widget
 
+
 class WidgetDecorator(Widget):
     def __init__(self, component):
         super(WidgetDecorator, self).__init__()
@@ -33,3 +34,10 @@ class WidgetDecorator(Widget):
             return
 
         self.component.disable()
+
+    def set_title(self, title):
+        self.title = title
+
+        if self.component is None:
+            return
+        self.component.set_title(title)

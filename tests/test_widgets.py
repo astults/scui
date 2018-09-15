@@ -87,13 +87,6 @@ class FrameWidgetTests(unittest.TestCase):
 
         self.assertPointsDrawn(expected, display.points_drawn)
 
-    def test_can_disable_frame(self):
-        self.frame.enabled = False
-        display = MockDisplay()
-        self.frame.draw(display)
-        expected_color = self.frame.border_color_when_disabled
-        self.assertIn(expected_color, display.bg_colors_seen)
-
     def test_frame_title_draw(self):
         frame = self.frame
         any_title = "A"
@@ -172,6 +165,7 @@ class TextBoxWidgetTests(unittest.TestCase):
         self.frame = Frame(self.any_width, self.any_height)
         self.any_color = [0, 0, 0, 0]
         self.offset = 4
+        self.text_box = TextBox()
 
     def test_can_initialize(self):
         text_box = TextBox()
@@ -182,6 +176,14 @@ class TextBoxWidgetTests(unittest.TestCase):
         actual = [t[2] for t in display.text_drawn]
         for c in expected:
             self.assertIn(c, actual)
+
+    def test_disable_text_box_fills_in_background(self):
+        self.text_box.text = "Hello World"
+        self.text_box.disable()
+        display = MockDisplay()
+        self.text_box.draw(display)
+        expected_color = self.text_box.background_color_when_disabled
+        self.assertIn(expected_color, display.bg_colors_seen)
 
     def test_text_wraps(self):
         text_box = TextBox()
@@ -252,18 +254,6 @@ class ListBoxWidgetTests(unittest.TestCase):
         self.assertEqual(listBox.width, display.max_x + 1)
         self.assertEqual(listBox.height, display.max_y + 1)
 
-
-    # Not sure I want this feature yet
-    # def test_line_wrapping(self):
-    #     listBox = self.list_box
-    #     empty_height = listBox.height
-    #     multi_line_line = "This is a line that will span multiple lines."
-    #     lines_added = 1 #don't count the new lines from the wrapping
-    #     listBox.add_line(multi_line_line)
-    #     display = MockDisplay()
-    #     listBox.draw(display)
-    #     self.assertTrue(empty_height + listBox.top_padding + lines_added < listBox.height, "Lines were not wrapped")
-
     def test_auto_resize(self):
         listBox = self.list_box
         listBox.auto_resize = True
@@ -279,15 +269,14 @@ class ListBoxWidgetTests(unittest.TestCase):
         listBox.draw(display)
         self.assertLess(pre_resize_height, listBox.height)
 
-    def test_can_select_list_item(self):
+    def test_select_list_item_fires_event(self):
         listBox = self.list_box
         listBox.auto_resize = True
         lines = ["Test", "Line", "Here"]
         listBox.add_lines(lines)
-        any_item_index = 1
-        listBox.call_back = self.toggle_value
+        any_item_index = 0
         listBox.select(any_item_index)
-        self.assertTrue(self._test_value)
+        self.assertTrue(False)
 
     def test_select_list_item_highlights_entry(self):
         listBox = self.list_box
@@ -306,7 +295,6 @@ class ListBoxWidgetTests(unittest.TestCase):
     def assertSubset(self, subset, container):
         for item in subset:
             self.assertIn(item, container, "Missing item from subset.")
-
 
     def toggle_value(self, event):
         self._test_value = not self._test_value

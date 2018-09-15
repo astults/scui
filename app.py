@@ -5,26 +5,31 @@ from console.display import MsConsoleDisplay
 from console.event_listener import EventListener
 from console.input import MsConsoleInput
 
+
 class DisplayWindow(object):
     def __init__(self, display):
         self.x = 0
         self.y = 0
         self._display = display
 
-    def draw_point(self, x0, y0, color, pixel = " "):
+    def draw_point(self, x0, y0, color, pixel=" "):
         self._display.draw_point(self.x + x0, self.y + y0, color, pixel)
 
-    def draw_text(self, x, y, text, color, bg_color = None):
-        self._display.draw_text(self.x + x, self.y + y, text , color, bg_color)
+    def draw_text(self, x, y, text, color, bg_color=None):
+        self._display.draw_text(self.x + x, self.y + y, text, color, bg_color)
 
     def draw_line(self, x0, y0, x1, y1, color):
-        self._display.draw_line(self.x + x0, self.y + y0, self.x + x1, self.y + y1, color)
+        self._display.draw_line(self.x + x0, self.y + y0,
+                                self.x + x1, self.y + y1,
+                                color)
 
     def clear(self):
         self._display.clear()
 
+
 class App(object):
-    def __init__(self, input_source = MsConsoleInput(), display = MsConsoleDisplay()):
+    def __init__(self, input_source=MsConsoleInput(),
+                 display=MsConsoleDisplay()):
         self.widgets = []
         self._cancel_event_polling = False
         self._event_queue = Queue()
@@ -47,7 +52,8 @@ class App(object):
     def _start_event_polling(self):
         """Start event-polling"""
         self.event_poll_thread = Thread(target=self._event_listener.start)
-        self.event_poll_thread.setDaemon(True) #close poll if main application exits
+        # close poll if main application exits
+        self.event_poll_thread.setDaemon(True)
         self.event_poll_thread.start()
 
     def draw_widget(self, w):
@@ -57,8 +63,7 @@ class App(object):
         w.draw(display_window)
 
     def _run_gui(self):
-        #self._display.clear()
-
+        self._display.clear()
         for widget in self.widgets:
             self.draw_widget(widget)
 
@@ -73,14 +78,10 @@ class App(object):
                         widget.is_dirty = False
                 if self._should_exit:
                     self.event_poll_thread.join()
+                    # self._display.clear()
                     return
             sleep(self._gui_refresh_in_seconds)
 
     def exit_event(self, event):
         if (event.key_code == self._event_listener.exit_key_value):
             self._should_exit = True
-
-
-
-
-#self._event_queue.put(self._event_listener.exit_key_value)
