@@ -25,3 +25,11 @@ class WidgetDecorator(Widget):
             return
 
         self.component.set_width(width)
+
+    def disable(self):
+        self.enabled = False
+
+        if self.component is None:
+            return
+
+        self.component.disable()

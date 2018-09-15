@@ -7,10 +7,12 @@ from widgets.list_box import ListBox
 from widgets.text_box import TextBox
 from enum import Enum
 
+
 class MockColor(Enum):
     BLACK = 0
     RED = 1
     GREEN = 2
+
 
 class MockDisplay(object):
     def __init__(self):
@@ -31,7 +33,7 @@ class MockDisplay(object):
 
         self.points_drawn.append([x0, y0, color, None])
 
-    def draw_text(self, x, y, text, fg_color, bg_color = None):
+    def draw_text(self, x, y, text, fg_color, bg_color=None):
         self.max_x = max(self.max_x, x + len(text))
         self.max_y = max(self.max_y, y)
         self.min_x = min(self.min_x, x)
@@ -50,6 +52,7 @@ class MockDisplay(object):
                 y += 1
             x0 += 1
 
+
 class MockWidget(object):
     def __init__(self):
         self.width = 1
@@ -58,7 +61,6 @@ class MockWidget(object):
 
     def draw(self, display):
         self.was_draw_method_called = True
-
 
 
 class FrameWidgetTests(unittest.TestCase):
@@ -85,6 +87,12 @@ class FrameWidgetTests(unittest.TestCase):
 
         self.assertPointsDrawn(expected, display.points_drawn)
 
+    def test_can_disable_frame(self):
+        self.frame.enabled = False
+        display = MockDisplay()
+        self.frame.draw(display)
+        expected_color = self.frame.border_color_when_disabled
+        self.assertIn(expected_color, display.bg_colors_seen)
 
     def test_frame_title_draw(self):
         frame = self.frame
@@ -93,7 +101,8 @@ class FrameWidgetTests(unittest.TestCase):
         display = MockDisplay()
         frame.title_text_color = self.any_color
         frame.draw(display)
-        self.assertEqual([[1, 0, "A", self.any_color, None]], display.text_drawn)
+        self.assertEqual([[1, 0, "A", self.any_color, None]],
+                         display.text_drawn)
 
     def test_frame_border_draw(self):
         frame = self.frame
@@ -116,7 +125,7 @@ class FrameWidgetTests(unittest.TestCase):
 
         self.assertPointsDrawn(expected, display.points_drawn)
 
-    def add_color(self, point, fg_color, bg_color = None):
+    def add_color(self, point, fg_color, bg_color=None):
         point.append(fg_color)
         point.append(bg_color)
 
@@ -128,8 +137,10 @@ class FrameWidgetTests(unittest.TestCase):
         w0 = Frame(w0_width, w0_height)
         w1 = Frame(w1_width, w1_height)
         frame = self.frame
-        frame.add_widget(0,0, w0)
-        #add at the bottom right edge of w0
+        frame.add_widget(0, 0, w0)
+
+        # add at the bottom right edge of w0
+
         frame.add_widget(w0.width, w0.height, w1)
         self.assertEqual(w0_width + w1_width, frame.width)
         self.assertEqual(w0_height + w1_height, frame.height)
@@ -137,22 +148,21 @@ class FrameWidgetTests(unittest.TestCase):
     def test_draw_widgets(self):
         w0 = MockWidget()
         frame = self.frame
-        frame.add_widget(0,0, w0)
+        frame.add_widget(0, 0, w0)
         display = display = MockDisplay()
         frame.draw(display)
-        self.assertTrue(w0.was_draw_method_called, "Draw method on widget was not called.")
-
+        self.assertTrue(w0.was_draw_method_called,
+                        "Draw method on widget was not called.")
 
     def assertPointsDrawn(self, expected_points, actual_points):
-        self.assertEqual(len(expected_points), len(actual_points), "Unequal count of points received.")
+        self.assertEqual(len(expected_points), len(actual_points),
+                         "Unequal count of points received.")
         for p in expected_points:
-            self.assertTrue(p in actual_points, "Missing %s in expected points." % str(p))
-
+            self.assertTrue(p in actual_points,
+                            "Missing %s in expected points." % str(p))
 
     def maplist(self, f, coll):
         return list(map(f, coll))
-
-
 
 
 class TextBoxWidgetTests(unittest.TestCase):
@@ -195,10 +205,6 @@ class TextBoxWidgetTests(unittest.TestCase):
         self.assertEqual(expected_text, text_box.text)
 
 
-
-
-
-
 class ListBoxWidgetTests(unittest.TestCase):
     def setUp(self):
         self.any_width = 3
@@ -222,7 +228,6 @@ class ListBoxWidgetTests(unittest.TestCase):
         actual = [t[2] for t in display.text_drawn]
         self.assertIn(expected, actual)
 
-
     def test_vertical_resize_on_new_line(self):
         listBox = self.list_box
         empty_height = listBox.height
@@ -240,7 +245,8 @@ class ListBoxWidgetTests(unittest.TestCase):
         any_line = "This is a test of a decently sized long line."
         listBox.add_line(any_line)
         listBox.draw(display)
-        self.assertLessEqual(display.max_x, listBox.width, "Drew beyond border")
+        self.assertLessEqual(display.max_x, listBox.width,
+                             "Drew beyond border")
         self.assertEqual(0, display.min_x)
         self.assertEqual(0, display.min_y)
         self.assertEqual(listBox.width, display.max_x + 1)
@@ -273,14 +279,13 @@ class ListBoxWidgetTests(unittest.TestCase):
         listBox.draw(display)
         self.assertLess(pre_resize_height, listBox.height)
 
-
     def test_can_select_list_item(self):
         listBox = self.list_box
         listBox.auto_resize = True
         lines = ["Test", "Line", "Here"]
         listBox.add_lines(lines)
         any_item_index = 1
-        listBox.call_back = self.toggle_test_value
+        listBox.call_back = self.toggle_value
         listBox.select(any_item_index)
         self.assertTrue(self._test_value)
 
@@ -292,7 +297,7 @@ class ListBoxWidgetTests(unittest.TestCase):
         display = MockDisplay()
         listBox.draw(display)
         any_item_index = 1
-        listBox.call_back = self.toggle_test_value
+        listBox.call_back = self.toggle_value
         listBox.select(any_item_index)
         listBox.draw(display)
         list_box_highlight_color = listBox.text_highlight_color
@@ -303,7 +308,7 @@ class ListBoxWidgetTests(unittest.TestCase):
             self.assertIn(item, container, "Missing item from subset.")
 
 
-    def toggle_test_value(self, event):
+    def toggle_value(self, event):
         self._test_value = not self._test_value
 
 
