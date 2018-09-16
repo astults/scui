@@ -3,6 +3,7 @@ from widgets.widget_decorator import WidgetDecorator
 from .frame import Frame
 from .text_box import TextBox
 from .common import Color
+from console.console_events import KeyCommands
 
 
 class ListBoxItem(object):
@@ -56,10 +57,14 @@ class ListBox(WidgetDecorator):
         self.text_highlight_color = Color.BLUE
         self.call_back = None
         self._selected_item = None
+        self._id_counter = 0
 
     def add_line(self, line):
         """Push line to bottom of list"""
-        self._items.append(ListBoxItem(line))
+        item = ListBoxItem(line)
+        item.id = self._id_counter
+        self._items.append(item)
+        self._id_counter += 1
 
     def add_lines(self, lines):
         for line in lines:
@@ -88,7 +93,7 @@ class ListBox(WidgetDecorator):
 
         super(ListBox, self).draw(display)
 
-        x, y = [self.top_padding, self.left_padding]
+        x, y = [self.left_padding, self.top_padding]
         for item in self._items:
             item.x = x
             item.y = y
@@ -100,6 +105,7 @@ class ListBox(WidgetDecorator):
     def on_select(self, item):
         self.clear_highlighting()
         self.highlight_item(item)
+        self._selected_item = item
         if self.call_back:
             self.call_back(item)
 
@@ -117,6 +123,30 @@ class ListBox(WidgetDecorator):
         for item in self._items:
             self.remove_highlight_item(item)
 
+    def get_key_command(self, event):
+        return event.key_command
+
+    def get_last_index(self):
+        return len(self._items) - 1
+        
     def handle_event(self, event):
-        self.select(0)
+        command = self.get_key_command(event)
+        if command is None:
+            return
+
+        n = len(self._items)
+        selected = self._selected_item
+        
+        if command == KeyCommands.UP:
+            if selected is None:
+                self.select(0)
+            elif selected.id > 0:
+                self.select(selected.id - 1)
+        elif command == KeyCommands.DOWN:
+            if selected is None:
+                self.select(n-1)
+            elif selected.id < (n-1):
+                self.select(selected.id + 1)
+
         self.is_dirty = True
+        return

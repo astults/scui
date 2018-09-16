@@ -20,14 +20,13 @@ class EventListener(object):
 
     def step_forward(self):
         if self.input_source.is_key_pressed():
-            scan_code = self.input_source.get_key_pressed()
-            if self._is_exit_code(scan_code):
+            key_event = self.input_source.get_key_pressed()
+            if self._is_exit_code(key_event.key_code):
                 self._should_exit = True
-            self.on_keyboard_event(scan_code)
+            self.on_keyboard_event(key_event)
 
     def _is_exit_code(self, scan_code):
         return scan_code == self.exit_key_value
 
-    def on_keyboard_event(self, scan_code):
-        event = KeyPressEvent(scan_code)
+    def on_keyboard_event(self, event):
         self._event_queue.put(event)

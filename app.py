@@ -3,7 +3,7 @@ from threading import Thread
 from time import sleep
 from console.display import MsConsoleDisplay
 from console.event_listener import EventListener
-from console.input import MsConsoleInput
+from console.console_events import KeyboardInput
 
 
 class DisplayWindow(object):
@@ -28,7 +28,7 @@ class DisplayWindow(object):
 
 
 class App(object):
-    def __init__(self, input_source=MsConsoleInput(),
+    def __init__(self, input_source=KeyboardInput(),
                  display=MsConsoleDisplay()):
         self.widgets = []
         self._cancel_event_polling = False
@@ -39,12 +39,17 @@ class App(object):
         self._display = display
         self._should_exit = False
         self._gui_refresh_in_seconds = 0.01
+        self._widget_in_focus = None
 
     def add_widget(self, widget, x=0, y=0):
         widget.x = x
         widget.y = y
         self.widgets.append(widget)
+        self.set_focus(widget)
 
+    def set_focus(self, w):
+        self._widget_in_focus = w
+        
     def start(self):
         self._start_event_polling()
         self._run_gui()
@@ -71,11 +76,12 @@ class App(object):
             while not self._event_queue.empty():
                 event = self._event_queue.get()
                 self.exit_event(event)
-                for widget in self.widgets:
-                    widget.handle_event(event)
-                    if widget.is_dirty:
-                        self.draw_widget(widget)
-                        widget.is_dirty = False
+                if self._widget_in_focus is not None:
+                    self._widget_in_focus.handle_event(event)
+                    if self._widget_in_focus.is_dirty:
+                        self.draw_widget(self._widget_in_focus)
+                        self._widget_in_focus.is_dirty = False
+                    
                 if self._should_exit:
                     self.event_poll_thread.join()
                     # self._display.clear()

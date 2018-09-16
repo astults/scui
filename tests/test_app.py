@@ -49,3 +49,6 @@ class AppTest(unittest.TestCase):
         app.start()
         self.assertEqual(any_pos_x, display.min_x)
         self.assertTrue(any_pos_y, display.min_y)
+
+    def test_can_focus_on_widget(self):
+        pass

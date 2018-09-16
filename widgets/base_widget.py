@@ -10,6 +10,7 @@ class Widget(object):
         self.border_color = Color.GREEN
         self.background_color = Color.BLACK
         self.title_text_color = Color.GREEN
+        self.title_bg_color = Color.BLACK
         self.background_color_when_disabled = Color.GREEN
         self.is_dirty = False
 
@@ -21,10 +22,15 @@ class Widget(object):
         pass
 
     def draw_title(self, display):
-        x = self.width // 2
+        x = (self.width - len(self.title) - 2) // 2
         y = 0
         color = self.title_text_color
-        display.draw_text(x, y, self.title, color)
+        bg_color = self.title_bg_color
+        if self.title is "":
+            text = ""
+        else:
+            text = " " + self.title + " "
+        display.draw_text(x, y, text, color, bg_color)
 
     def draw_border(self, display):
         if not self.border_enabled:

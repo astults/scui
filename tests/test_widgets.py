@@ -25,6 +25,9 @@ class MockDisplay(object):
         self.min_x = 99999
         self.min_y = 99999
 
+    def clear(self):
+        pass
+        
     def draw_point(self, x0, y0, color, pixel=""):
         self.max_x = max(self.max_x, x0)
         self.max_y = max(self.max_y, y0)
@@ -216,6 +219,7 @@ class ListBoxWidgetTests(unittest.TestCase):
         self.offset = 4
         self.list_box = ListBox()
         self._test_value = False
+        self.item_selected = None
 
     def test_draw_of_list_contents(self):
         new_line = "Test Line 1"
@@ -275,8 +279,9 @@ class ListBoxWidgetTests(unittest.TestCase):
         lines = ["Test", "Line", "Here"]
         listBox.add_lines(lines)
         any_item_index = 0
+        listBox.call_back = self.list_box_select_callback
         listBox.select(any_item_index)
-        self.assertTrue(False)
+        self.assertIsNotNone(self.item_selected)
 
     def test_select_list_item_highlights_entry(self):
         listBox = self.list_box
@@ -298,6 +303,9 @@ class ListBoxWidgetTests(unittest.TestCase):
 
     def toggle_value(self, event):
         self._test_value = not self._test_value
+
+    def list_box_select_callback(self, event):
+        self.item_selected = event
 
 
 if __name__ == '__main__':
