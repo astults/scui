@@ -4,22 +4,28 @@ from time import sleep
 from console.event_listener import EventListener
 from unittest.mock import Mock, MagicMock
 
-class MockEventGenerator(object):
+
+class MockEvent(object):
     def __init__(self):
         pass
 
-    def generate(self):
-        pass
 
 class MockConsoleInput(object):
     def __init__(self):
-        self._input_codes = []
+        self._events = []
         self._poll_count = 0
         self.exit_key_value = 113
 
     def set_next_input_code(self, c):
-        self._input_codes.append(c)
+        e = MockEvent()
+        e.key_code = c
+        e.key_command = None
+        e.key_char = chr(e.key_code)
+        self.set_next_event(e)
 
+    def set_next_event(self, e):
+        self._events.append(e)
+    
     def is_key_pressed(self):
         self._poll_count += 1
         if self._poll_count >= 2:
@@ -27,8 +33,12 @@ class MockConsoleInput(object):
         return False
 
     def get_key_pressed(self):
-        e = self._input_codes.pop(0)
+        if len(self._events) == 0:
+            self.set_next_input_code(self.exit_key_value)
+
+        e = self._events.pop(0)
         return e
+
 
 class MockQueue(object):
     def __init__(self):

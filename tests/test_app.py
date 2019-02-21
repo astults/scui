@@ -3,12 +3,15 @@ from app import App
 from tests.test_events import MockConsoleInput
 from tests.test_widgets import MockDisplay
 from widgets.text_box import TextBox
+from widgets.widget_decorator import WidgetDecorator
+from console.console_events import KeyPressEvent, KeyCommands
 
 
-class MockTextWidget(object):
+class MockTextWidget(WidgetDecorator):
     def __init__(self):
         self.draw_counts = 0
         self.is_dirty = False
+        super(MockTextWidget, self).__init__(None)
 
     def draw(self, display):
         self.draw_counts += 1
@@ -50,5 +53,32 @@ class AppTest(unittest.TestCase):
         self.assertEqual(any_pos_x, display.min_x)
         self.assertTrue(any_pos_y, display.min_y)
 
-    def test_can_focus_on_widget(self):
-        pass
+    def test_can_tab_to_next_widget(self):
+        mock_input = MockConsoleInput()
+        tab_event = KeyPressEvent(0, KeyCommands.TAB)
+        mock_input.set_next_event(tab_event)
+        display = MockDisplay()
+        app = App(mock_input, display)
+        any_widget = MockTextWidget()
+        another_widget = MockTextWidget()
+        app.add_widget(any_widget)
+        app.add_widget(another_widget)
+        self.assertSameWidget(another_widget, app.focused_widget, "Wrong widget has focus")
+        app.start()
+        self.assertSameWidget(any_widget, app.focused_widget, "Wrong widget has focus")
+
+    def test_can_generate_unique_ids(self):
+        app = App(None, None)
+        any_widget = MockTextWidget()
+        another_widget = MockTextWidget()
+        app.add_widget(any_widget)
+        app.add_widget(another_widget)
+        self.assertNotSameWidget(any_widget, another_widget)
+
+    def assertSameWidget(self, w1, w2, message=""):
+        fail_msg = "Widgets not equal." + message
+        self.assertEqual(w1.id, w2.id, fail_msg)
+
+    def assertNotSameWidget(self, w1, w2, message=""):
+        fail_msg = "Widgets unexpectedly equal." + message
+        self.assertNotEqual(w1.id, w2.id, fail_msg)

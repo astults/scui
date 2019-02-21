@@ -25,6 +25,14 @@ class TextBox(WidgetDecorator):
         self.height = default_height
         self.background_color_when_disabled = Color.GREEN
 
+    def set_text(self, text):
+        if len(self.text) > len(text):
+            self._redraw_frame = True
+        self.text = text
+        self._cursor_index = 0
+        self._cursor_pos = [self.left_padding, self.top_padding]
+        self.is_dirty = True
+
     def draw(self, display):
         if self._redraw_frame:
             super(TextBox, self).draw(display)
@@ -37,7 +45,7 @@ class TextBox(WidgetDecorator):
         bg_color = self.background_color
         if not self.enabled:
             bg_color = self.background_color_when_disabled
-
+            
         while i < len(self.text):
             x, y = self._cursor_pos
             c = self.text[i]

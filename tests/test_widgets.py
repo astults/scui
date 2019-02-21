@@ -27,7 +27,7 @@ class MockDisplay(object):
 
     def clear(self):
         pass
-        
+
     def draw_point(self, x0, y0, color, pixel=""):
         self.max_x = max(self.max_x, x0)
         self.max_y = max(self.max_y, y0)
@@ -93,12 +93,16 @@ class FrameWidgetTests(unittest.TestCase):
     def test_frame_title_draw(self):
         frame = self.frame
         any_title = "A"
-        frame.title = "A"
+        frame.title = any_title
+        expected_title_text = " " + any_title + " "
         display = MockDisplay()
         frame.title_text_color = self.any_color
+        frame.title_bg_color = self.any_color
         frame.draw(display)
-        self.assertEqual([[1, 0, "A", self.any_color, None]],
-                         display.text_drawn)
+        self.assertIn([0, 0,
+                       expected_title_text,
+                       self.any_color, self.any_color],
+                      display.text_drawn)
 
     def test_frame_border_draw(self):
         frame = self.frame

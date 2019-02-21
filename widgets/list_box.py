@@ -20,7 +20,7 @@ class ListBoxItem(object):
         self.y = 0
 
     def draw(self, display):
-        truncated_text = self.text[:self.width]
+        truncated_text = self.text[:self.width-1]
         text_color = self.__text_color()
         bg_color = self.__bg_color()
         display.draw_text(self.x, self.y, truncated_text, text_color, bg_color)
@@ -93,11 +93,12 @@ class ListBox(WidgetDecorator):
 
         super(ListBox, self).draw(display)
 
+        item_width = self.width - self.right_padding
         x, y = [self.left_padding, self.top_padding]
         for item in self._items:
             item.x = x
             item.y = y
-            item.width = self.width - self.right_padding
+            item.width = item_width
             item.highlight_text_color = self.text_highlight_color
             item.draw(display)
             y += 1

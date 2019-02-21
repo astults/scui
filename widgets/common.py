@@ -1,10 +1,12 @@
 from enum import Enum
 
+
 class Color(Enum):
     BLACK = 0
     RED = 1
     BLUE = 2
     GREEN = 3
+
 
 class TextUtils(object):
 
@@ -13,10 +15,10 @@ class TextUtils(object):
         if max_line_length < 0:
             raise Exception("Max line length must be greater than 0.")
         lines = []
-        i,j = 0, max_line_length
+        i, j = 0, max_line_length
         while i <= len(line):
             lines.append(line[i:j])
-            i,j = j, j + max_line_length
+            i, j = j, j + max_line_length
         return lines
 
     @staticmethod

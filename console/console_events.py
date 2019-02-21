@@ -3,9 +3,11 @@ import msvcrt
 from enum import Enum
 from console.input import MsConsoleInput
 
+
 class KeyTag(Enum):
     PRINT = 0
     CONTROL = 1
+
 
 class KeyCommands(Enum):
     NEWLINE = 0
@@ -13,11 +15,11 @@ class KeyCommands(Enum):
     DOWN = 2
     LEFT = 3
     RIGHT = 4
-    
+    TAB = 5
+
 
 class KeyPressEvent(object):
-   
-    def __init__(self, key_code, key_command):
+    def __init__(self, key_code, key_command=None):
         self.key_code = key_code
         self.key_command = key_command
         self.tag = self.set_tag(self.key_code)
@@ -33,14 +35,14 @@ class KeyPressEvent(object):
         return KeyTag.CONTROL
 
 
-
 class KeyboardInput(object):
     CAR_RETURN = 13
     NEWLINE = 10
     ARROW_BASE = 224
     ARROW_UP = 72
     ARROW_DOWN = 80
-    
+    TAB = 9
+ 
     def __init__(self, inp=MsConsoleInput()):
         self._input = inp
 
@@ -72,4 +74,7 @@ class KeyboardInput(object):
 
         if k1 == KeyboardInput.NEWLINE:
             return KeyCommands.NEWLINE
+
+        if k0 == KeyboardInput.TAB:
+            return KeyCommands.TAB
         return None

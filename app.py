@@ -3,7 +3,7 @@ from threading import Thread
 from time import sleep
 from console.display import MsConsoleDisplay
 from console.event_listener import EventListener
-from console.console_events import KeyboardInput
+from console.console_events import KeyboardInput, KeyCommands
 
 
 class DisplayWindow(object):
@@ -40,16 +40,24 @@ class App(object):
         self._should_exit = False
         self._gui_refresh_in_seconds = 0.01
         self._widget_in_focus = None
+        self.focused_widget = None
+        self._next_widget_id = 0
+
+    def inc_widget_id(self):
+        self._next_widget_id += 1
 
     def add_widget(self, widget, x=0, y=0):
         widget.x = x
         widget.y = y
+        widget.id = self._next_widget_id
+        self.inc_widget_id()
         self.widgets.append(widget)
         self.set_focus(widget)
 
     def set_focus(self, w):
         self._widget_in_focus = w
-        
+        self.focused_widget = w
+
     def start(self):
         self._start_event_polling()
         self._run_gui()
@@ -76,12 +84,16 @@ class App(object):
             while not self._event_queue.empty():
                 event = self._event_queue.get()
                 self.exit_event(event)
-                if self._widget_in_focus is not None:
-                    self._widget_in_focus.handle_event(event)
-                    if self._widget_in_focus.is_dirty:
-                        self.draw_widget(self._widget_in_focus)
-                        self._widget_in_focus.is_dirty = False
-                    
+                self.tab_event(event)
+                if self.focused_widget is not None:
+                    self.focused_widget.handle_event(event)
+                    if self.focused_widget.is_dirty:
+                        self.draw_widget(self.focused_widget)
+                        self.focused_widget.is_dirty = False
+                for w in self.widgets:
+                    if w.is_dirty:
+                        self.draw_widget(w)
+                        w.is_dirty = False
                 if self._should_exit:
                     self.event_poll_thread.join()
                     # self._display.clear()
@@ -91,3 +103,14 @@ class App(object):
     def exit_event(self, event):
         if (event.key_code == self._event_listener.exit_key_value):
             self._should_exit = True
+
+    def tab_event(self, event):
+        if (event.key_command == KeyCommands.TAB):
+            self.select_next_widget()
+
+    def select_next_widget(self):
+        current_id = self.focused_widget.id
+        if current_id >= len(self.widgets) - 1:
+            self.focused_widget = self.widgets[0]
+        else:
+            self.focused_widget = self.widgets[current_id + 1]
